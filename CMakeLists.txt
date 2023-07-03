@@ -7,6 +7,7 @@ project(ini-cpp)
 # List of source files for the project
 set(SOURCE_FILES 
     src/main.cpp
+    src/ini_value.cpp
 )
 
 # Set the executable file for the project (should change to lib later)
