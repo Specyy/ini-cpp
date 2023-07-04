@@ -12,6 +12,8 @@ namespace inicpp {
     class ini_value {
     public:
         constexpr ini_value() noexcept = default;
+        constexpr ini_value(const ini_value&) = default;
+        constexpr ini_value(ini_value&&) noexcept = default;
         constexpr inline INICPP ini_value(const std::string& data);
         constexpr inline INICPP ini_value(std::string&& data) noexcept;
 
@@ -42,6 +44,9 @@ namespace inicpp {
 
     constexpr inline INICPP ini_value::ini_value(const std::string& data) : m_data(data) {}
     constexpr inline INICPP ini_value::ini_value(std::string&& data) noexcept : m_data(std::move(data)) {}
+
+    template<>
+    inline INICPP const char* ini_value::as() const { return get_value().c_str(); }
 
     template<>
     inline INICPP const std::string& ini_value::as() const { return get_value(); }
@@ -119,6 +124,12 @@ namespace inicpp {
     template<>
     inline INICPP ini_value& ini_value::operator =(std::string&& str) {
         this->set_value(std::move(str));
+        return *this;
+    }
+
+    template<>
+    inline INICPP ini_value& ini_value::operator =(const char* const str) {
+        this->set_value(std::string(str));
         return *this;
     }
 
