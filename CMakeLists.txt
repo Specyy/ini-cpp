@@ -8,6 +8,7 @@ project(ini-cpp)
 set(SOURCE_FILES 
     src/main.cpp
     src/ini_value.cpp
+    src/ini_section.cpp
 )
 
 # Set the executable file for the project (should change to lib later)
