@@ -133,13 +133,13 @@ namespace inicpp::detail {
          * @brief Removes the first element of the container. Calling pop_front on an empty container is a no-op. 
          * References and iterators to the erased element are invalidated.
          */
-        inline void pop_front() { if (size() > 0) { erase(front()); } }
+        inline void pop_front() { if (size() > 0) { erase(m_lookup_map[m_order.front()]); } }
 
         /**
          * @brief Removes the last element of the container. Calling pop_back on an empty container is a no-op. 
          * References and iterators to the erased element are invalidated.
          */
-        inline void pop_back() { if (size() > 0) { erase(back()); } }
+        inline void pop_back() { if (size() > 0) { erase(m_lookup_map[m_order.back()]); } }
 
         /**
          * @brief Inserts element(s) into the container. If the container doesn't already contain an element with an equivalent key,
