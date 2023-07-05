@@ -57,18 +57,17 @@ namespace inicpp::detail {
             if (c == m_map.end()) {
                 auto r = m_map.insert(value);
                 auto i = m_order.insert(pos.m_order_it, r.first.operator->());
+                m_lookup_map.insert(std::pair<value_type* const, typename std::list<value_type*>::const_iterator>{r.first.operator->(), i});
                 return iterator(i);
             } else {
-                for (auto b = m_order.begin(); b != m_order.end(); ++b) {
-                    if (*b == c.operator->()) {
-                        c->second = value.second;
-                        auto i = m_order.insert(pos.m_order_it, c.operator->());
-                        m_order.erase(b);
-                        return iterator(i);
-                    }
-                }
+                auto f = m_lookup_map.find(c.operator->());
+                typename std::list<value_type*>::const_iterator p_it = f->second;
+                (*p_it)->second = value.second;
+                auto i = m_order.insert(pos.m_order_it, (*p_it));
+                m_lookup_map[f->first] = i;
+                m_order.erase(p_it);
+                return iterator(i);
             }
-            throw std::runtime_error("ordered_map::insert() failed to insert value");
         }
 
         /**
@@ -83,18 +82,17 @@ namespace inicpp::detail {
             if (c == m_map.end()) {
                 auto r = m_map.insert(std::move(value));
                 auto i = m_order.insert(pos.m_order_it, r.first.operator->());
+                m_lookup_map.insert(std::pair<value_type const* const, typename std::list<value_type*>::const_iterator>{r.first.operator->(), i});
                 return iterator(i);
             } else {
-                for (auto b = m_order.begin(); b != m_order.end(); ++b) {
-                    if (*b == c.operator->()) {
-                        c->second = std::move(value.second);
-                        auto i = m_order.insert(pos.m_order_it, c.operator->());
-                        m_order.erase(b);
-                        return iterator(i);
-                    }
-                }
+                auto f = m_lookup_map.find(c.operator->());
+                typename std::list<value_type*>::const_iterator p_it = f->second;
+                (*p_it)->second = std::move(value.second);
+                auto i = m_order.insert(pos.m_order_it, (*p_it));
+                m_lookup_map[f->first] = i;
+                m_order.erase(p_it);
+                return iterator(i);
             }
-            throw std::runtime_error("ordered_map::insert() failed to insert value");
         }
 
         /**
@@ -104,6 +102,7 @@ namespace inicpp::detail {
          */
         inline iterator erase(const_iterator pos) {
             m_map.erase(pos->first);
+            m_lookup_map.erase(*pos.m_order_it);
             auto i = m_order.erase(pos.m_order_it);
             return iterator(i);
         }
@@ -120,7 +119,12 @@ namespace inicpp::detail {
          * @param key key value of the elements to remove
          * @return Number of elements removed (0 or 1).
          */
-        inline size_type erase(const key_type& key) { return erase(cbegin(), key); }
+        inline size_type erase(const key_type& key) {
+            auto f = m_map.find(key);
+            if (f == m_map.end()) return 0;
+            erase(const_iterator(m_lookup_map[f.operator->()]));
+            return 1;
+        }
 
         /**
          * @brief Erases the specified elements from the container.
@@ -128,46 +132,6 @@ namespace inicpp::detail {
          * @return Number of elements removed (0 or 1).
          */
         inline size_type remove(const key_type& key) { return erase(key); }
-
-        /**
-         * @brief Erases the specified elements from the container.
-         * @param hint hint as to where the key may be located with respect to the current order
-         * @param key key value of the elements to remove
-         * @return Number of elements removed (0 or 1).
-         */
-        size_type erase(const_iterator hint, const key_type& key) {
-            auto look = m_map.find(key);
-            if (look == m_map.cend()) { return 0; }
-            for (const_iterator c = hint; c != cend(); ++c) {
-                auto f = m_map.find(c->first);
-                if (f == look) {
-                    m_map.erase(f);
-                    auto i = m_order.erase(c.m_order_it);
-                    return 1;
-                }
-            }
-            if (hint != cbegin()) {
-                const_iterator c = --hint;
-                do {
-                    auto f = m_map.find(c->first);
-                    if (f == look) {
-                        m_map.erase(f);
-                        auto i = m_order.erase(c.m_order_it);
-                        return 1;
-                    }
-                    --c;
-                } while (c != cbegin());
-            }
-            return 0;
-        }
-
-        /**
-         * @brief Erases the specified elements from the container.
-         * @param key key value of the elements to remove
-         * @param hint hint as to where the key may be located with respect to the current order
-         * @return Number of elements removed (0 or 1).
-         */
-        inline size_type remove(const_iterator hint, const key_type& key) { return erase(hint, key); }
 
         inline void swap(ordered_map& other) noexcept(noexcept(std::unordered_map<K, V>::swap)) { m_order.swap(other.m_order); m_map.swap(other.m_map); }
 
@@ -191,78 +155,44 @@ namespace inicpp::detail {
          */
         inline void reverse() noexcept { m_order.reverse(); }
 
-        inline iterator find(const key_type& key) { return find(cbegin(), key); }
-
-        iterator find(const_iterator hint, const key_type& key) {
+        inline iterator find(const key_type& key) {
             auto look = m_map.find(key);
             if (look == m_map.end()) { return end(); }
-            for (const_iterator c = hint; c != cend(); ++c) {
-                auto f = m_map.find(c->first);
-                if (f == look) {
-                    return iterator(c.m_order_it);
-                }
-            }
-            if (hint != cbegin()) {
-                const_iterator c = --hint;
-                do {
-                    auto f = m_map.find(c->first);
-                    if (f == look) {
-                        return iterator(c.m_order_it);
-                    }
-                    --c;
-                } while (c != cbegin());
-            }
-            return end();
+            auto f = m_lookup_map.find(look.operator->());
+            return iterator(f->second);
         }
 
-        inline const_iterator find(const key_type& key) const { return find(cbegin(), key); }
-
-        const_iterator find(const_iterator hint, const key_type& key) const {
+        inline const_iterator find(const key_type& key) const {
             auto look = m_map.find(key);
             if (look == m_map.end()) { return end(); }
-            for (const_iterator c = hint; c != cend(); ++c) {
-                auto f = m_map.find(c->first);
-                if (f == look) {
-                    return c;
-                }
-            }
-            if (hint != cbegin()) {
-                const_iterator c = --hint;
-                do {
-                    auto f = m_map.find(c->first);
-                    if (f == look) {
-                        return c;
-                    }
-                    --c;
-                } while (c != cbegin());
-            }
-            return end();
+            auto f = m_lookup_map.find(look.operator->());
+            return const_iterator(f->second);
         }
 
         mapped_type& at(const key_type& key) {
-            auto f = find(key);
-            if (f != end()) return f->second;
+            auto f = m_map.find(key);
+            if (f != m_map.end()) return f->second;
             throw std::out_of_range("ordered_map::at");
         }
 
         mapped_type const& at(const key_type& key) const {
-            auto f = find(key);
-            if (f != cend()) return f->second;
+            auto f = m_map.find(key);
+            if (f != m_map.cend()) return f->second;
             throw std::out_of_range("ordered_map::at");
         }
 
         inline mapped_type& operator[](const key_type& key) {
-            auto f = find(key);
-            if (f != end()) return f->second;
-            push_back(value_type(std::move(key), mapped_type()));
+            auto f = m_map.find(key);
+            if (f != m_map.end()) return f->second;
+            push_back(value_type(key, mapped_type()));
             return back();
         }
 
         inline mapped_type const& operator[](const key_type& key) const { return at(key); }
 
         inline mapped_type& operator[](key_type&& key) {
-            auto f = find(key);
-            if (f != end()) return f->second;
+            auto f = m_map.find(key);
+            if (f != m_map.end()) return f->second;
             push_back(value_type(std::move(key), mapped_type()));
             return back();
         }
@@ -293,6 +223,7 @@ namespace inicpp::detail {
     private:
         std::list<value_type*> m_order;
         std::unordered_map<K, V> m_map;
+        std::unordered_map<value_type const*, typename std::list<value_type*>::const_iterator> m_lookup_map;
 
         friend struct ordered_map_iterator<K, V>;
         friend struct ordered_map_reverse_iterator<K, V>;
