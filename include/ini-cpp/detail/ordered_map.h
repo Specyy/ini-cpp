@@ -33,7 +33,7 @@ namespace inicpp::detail {
          * @brief Default constructor. Constructs an empty container with a default-constructed allocator.
          */
         ordered_map() noexcept = default;
-       
+
         /**
          * @brief Copy constructor. Constructs the container with the copy of the contents of other.
          * @param other another container to be used as source to initialize the elements of the container with
@@ -74,7 +74,7 @@ namespace inicpp::detail {
         ordered_map& operator=(const ordered_map& other) noexcept = default;
 
         /**
-         * @brief Move assignment operator. Replaces the contents with those of other using move semantics (i.e. the data in other is moved from other into this container). 
+         * @brief Move assignment operator. Replaces the contents with those of other using move semantics (i.e. the data in other is moved from other into this container).
          * other is in a valid but unspecified state afterwards.
          * @param other another container to use as data source
          * @return *this
@@ -128,6 +128,18 @@ namespace inicpp::detail {
          * @param value the value of the element to append
          */
         inline void push_back(value_type&& value) { insert(cend(), std::move(value)); }
+
+        /**
+         * @brief Removes the first element of the container. Calling pop_front on an empty container is a no-op. 
+         * References and iterators to the erased element are invalidated.
+         */
+        inline void pop_front() { if (size() > 0) { erase(front()); } }
+
+        /**
+         * @brief Removes the last element of the container. Calling pop_back on an empty container is a no-op. 
+         * References and iterators to the erased element are invalidated.
+         */
+        inline void pop_back() { if (size() > 0) { erase(back()); } }
 
         /**
          * @brief Inserts element(s) into the container. If the container doesn't already contain an element with an equivalent key,
@@ -412,24 +424,24 @@ namespace inicpp::detail {
         inline const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator(cend()); }
 
         /**
-         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map. 
-         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder, 
+         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map.
+         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder,
          * attempting to access it results in undefined behavior.
          * @return Reverse iterator to the element following the last element.
          */
         inline reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 
         /**
-         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map. 
-         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder, 
+         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map.
+         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder,
          * attempting to access it results in undefined behavior.
          * @return Reverse iterator to the element following the last element.
          */
         inline const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
 
         /**
-         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map. 
-         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder, 
+         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map.
+         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder,
          * attempting to access it results in undefined behavior.
          * @return Reverse iterator to the element following the last element.
          */
