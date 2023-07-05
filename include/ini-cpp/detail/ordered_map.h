@@ -267,7 +267,7 @@ namespace inicpp::detail {
             return back();
         }
 
-        inline bool contains(const key_type& key) const { return find(key) != cend(); }
+        inline bool contains(const key_type& key) const { return m_map.find(key) != m_map.end(); }
 
         inline mapped_type& back() noexcept { return m_order.back()->second; }
         inline mapped_type const& back() const noexcept { return m_order.back()->second; }
