@@ -3,6 +3,8 @@
 
 #include "detail/ordered_map_iterator.h"
 
+#include <initializer_list>
+
 namespace inicpp::detail {
     template<typename K, typename V>
     class ordered_map {
@@ -27,22 +29,104 @@ namespace inicpp::detail {
     private:
         typedef ordered_map<K, V> ordered_map_type;
     public:
+        /**
+         * @brief Default constructor. Constructs an empty container with a default-constructed allocator.
+         */
         ordered_map() noexcept = default;
-        ordered_map(const ordered_map&) noexcept = default;
-        ordered_map(ordered_map&&) noexcept = default;
+       
+        /**
+         * @brief Copy constructor. Constructs the container with the copy of the contents of other.
+         * @param other another container to be used as source to initialize the elements of the container with
+         */
+        ordered_map(const ordered_map& other) noexcept = default;
 
-        ordered_map& operator=(const ordered_map&) noexcept = default;
-        ordered_map& operator=(ordered_map&&) noexcept = default;
+        /**
+         * @brief Move constructor. Constructs the container with the contents of other using move semantics.
+         * @param other another container to be used as source to initialize the elements of the container with
+         */
+        ordered_map(ordered_map&& other) noexcept = default;
 
+        /**
+         * @brief Constructs the container with the contents of the range [first, last). Sets max_load_factor() to 1.0.
+         * If multiple elements in the range have keys that compare equivalent, the last one is kept.
+         * @tparam InputIt must meet the requirements of LegacyInputIterator.
+         * @param first the range to copy the elements from
+         * @param last the range to copy the elements from
+         */
+        template< class InputIt >
+        inline ordered_map(InputIt first, InputIt last) {
+            for (; first != last;++first) {
+                push_back(*first);
+            }
+        }
+
+        /**
+         * @brief constructs the container with the contents of the initializer list init, same as ordered_map(init.begin(), init.end()).
+         * @param init initializer list to initialize the elements of the container with
+         */
+        inline ordered_map(std::initializer_list<value_type> init) : ordered_map(init.begin(), init.end()) { }
+
+        /**
+         * @brief Copy assignment operator. Replaces the contents with a copy of the contents of other.
+         * @param other another container to use as data source
+         * @return *this
+         */
+        ordered_map& operator=(const ordered_map& other) noexcept = default;
+
+        /**
+         * @brief Move assignment operator. Replaces the contents with those of other using move semantics (i.e. the data in other is moved from other into this container). 
+         * other is in a valid but unspecified state afterwards.
+         * @param other another container to use as data source
+         * @return *this
+         */
+        ordered_map& operator=(ordered_map&& other) noexcept = default;
+
+        /**
+         * @brief Checks if the container has no elements, i.e. whether begin() == end().
+         * @return true if the container is empty, false otherwise
+         */
         inline bool empty() const noexcept { return m_map.empty(); }
-        inline size_type size() const noexcept { return m_map.size(); }
-        inline size_type max_size() const noexcept { return m_map.max_size(); }
-        inline void clear() noexcept { return m_map.clear(); }
 
+        /**
+         * @brief Returns the number of elements in the container, i.e. std::distance(begin(), end()).
+         * @return The number of elements in the container.
+         */
+        inline size_type size() const noexcept { return m_map.size(); }
+
+        /**
+         * @brief Returns the maximum number of elements the container is able to hold due to system or library implementation limitations, i.e. std::distance(begin(), end()) for the largest container.
+         * @return Maximum number of elements.
+         */
+        inline size_type max_size() const noexcept { return std::min(m_order.max_size(), std::min(m_map.max_size(), m_lookup_map.max_size())); }
+
+        /**
+         * @brief Erases all elements from the container. After this call, size() returns zero.
+         * Invalidates any references, pointers, or iterators referring to contained elements. May also invalidate past-the-end iterators.
+         */
+        inline void clear() noexcept { m_order.clear(); m_map.clear(); m_lookup_map.clear(); }
+
+        /**
+         * @brief Prepends the given element value to the beginning of the container. No iterators or references are invalidated.
+         * @param value the value of the element to prepend
+         */
         inline void push_front(const value_type& value) { insert(cbegin(), value); }
+
+        /**
+         * @brief Prepends the given element value to the beginning of the container. No iterators or references are invalidated.
+         * @param value the value of the element to prepend
+         */
         inline void push_front(value_type&& value) { insert(cbegin(), std::move(value)); }
 
+        /**
+         * @brief Appends the given element value to the end of the container. No iterators or references are invalidated.
+         * @param value the value of the element to append
+         */
         inline void push_back(const value_type& value) { insert(cend(), value); }
+
+        /**
+         * @brief Appends the given element value to the end of the container. No iterators or references are invalidated.
+         * @param value the value of the element to append
+         */
         inline void push_back(value_type&& value) { insert(cend(), std::move(value)); }
 
         /**
@@ -133,7 +217,11 @@ namespace inicpp::detail {
          */
         inline size_type remove(const key_type& key) { return erase(key); }
 
-        inline void swap(ordered_map& other) noexcept(noexcept(std::unordered_map<K, V>::swap)) { m_order.swap(other.m_order); m_map.swap(other.m_map); }
+        /**
+         * @brief Exchanges the contents of the container with those of other. Does not invoke any move, copy, or swap operations on individual elements. All iterators and references remain valid. The end() iterator is invalidated.
+         * @param other container to exchange the contents with
+         */
+        inline void swap(ordered_map& other) noexcept(noexcept(std::unordered_map<K, V>::swap)) { m_order.swap(other.m_order); m_map.swap(other.m_map); m_lookup_map.swap(other.m_lookup_map); }
 
         /**
          * @brief Sorts the elements in ascending order. The order of equal elements is preserved. The first version uses operator< to compare the elements,
@@ -155,6 +243,11 @@ namespace inicpp::detail {
          */
         inline void reverse() noexcept { m_order.reverse(); }
 
+        /**
+         * @brief Finds an element with key equivalent to key. This function has constant complexity on average, worst case linear in the size of the container.
+         * @param key key value of the element to search for
+         * @return Iterator to an element with key equivalent to key. If no such element is found, past-the-end (see end()) iterator is returned.
+         */
         inline iterator find(const key_type& key) {
             auto look = m_map.find(key);
             if (look == m_map.end()) { return end(); }
@@ -162,6 +255,11 @@ namespace inicpp::detail {
             return iterator(f->second);
         }
 
+        /**
+         * @brief Finds an element with key equivalent to key. This function has constant complexity on average, worst case linear in the size of the container.
+         * @param key key value of the element to search for
+         * @return Iterator to an element with key equivalent to key. If no such element is found, past-the-end (see end()) iterator is returned.
+         */
         inline const_iterator find(const key_type& key) const {
             auto look = m_map.find(key);
             if (look == m_map.end()) { return end(); }
@@ -169,18 +267,33 @@ namespace inicpp::detail {
             return const_iterator(f->second);
         }
 
-        mapped_type& at(const key_type& key) {
+        /**
+         * @brief Returns a reference to the mapped value of the element with key equivalent to key. If no such element exists, an exception of type std::out_of_range is thrown.
+         * @param key the key of the element to find
+         * @return Reference to the mapped value of the requested element.
+         */
+        inline mapped_type& at(const key_type& key) {
             auto f = m_map.find(key);
             if (f != m_map.end()) return f->second;
             throw std::out_of_range("ordered_map::at");
         }
 
-        mapped_type const& at(const key_type& key) const {
+        /**
+         * @brief Returns a reference to the mapped value of the element with key equivalent to key. If no such element exists, an exception of type std::out_of_range is thrown.
+         * @param key the key of the element to find
+         * @return Reference to the mapped value of the requested element.
+         */
+        inline mapped_type const& at(const key_type& key) const {
             auto f = m_map.find(key);
             if (f != m_map.cend()) return f->second;
             throw std::out_of_range("ordered_map::at");
         }
 
+        /**
+         * @brief Returns a reference to the value that is mapped to a key equivalent to key, performing an insertion if such key does not already exist.
+         * @param key the key of the element to find
+         * @return Reference to the mapped value of the new element if no element with key key existed. Otherwise a reference to the mapped value of the existing element whose key is equivalent to key.
+         */
         inline mapped_type& operator[](const key_type& key) {
             auto f = m_map.find(key);
             if (f != m_map.end()) return f->second;
@@ -188,8 +301,11 @@ namespace inicpp::detail {
             return back();
         }
 
-        inline mapped_type const& operator[](const key_type& key) const { return at(key); }
-
+        /**
+         * @brief Returns a reference to the value that is mapped to a key equivalent to key, performing an insertion if such key does not already exist.
+         * @param key the key of the element to find
+         * @return Reference to the mapped value of the new element if no element with key key existed. Otherwise a reference to the mapped value of the existing element whose key is equivalent to key.
+         */
         inline mapped_type& operator[](key_type&& key) {
             auto f = m_map.find(key);
             if (f != m_map.end()) return f->second;
@@ -197,28 +313,126 @@ namespace inicpp::detail {
             return back();
         }
 
+        /**
+         * @brief Returns a reference to the value that is mapped to a key equivalent to key. If no such element exists, an exception of type std::out_of_range is thrown.
+         * @param key the key of the element to find
+         * @return A reference to the mapped value of the existing element whose key is equivalent to key.
+         */
+        inline mapped_type const& operator[](const key_type& key) const { return at(key); }
+
+        /**
+         * @brief Checks if there is an element with key equivalent to key in the container.
+         * @param key key value of the element to search for
+         * @return true if there is such an element, otherwise false.
+         */
         inline bool contains(const key_type& key) const { return m_map.find(key) != m_map.end(); }
 
+        /**
+         * @brief Returns a reference to the last element in the container. Calling back on an empty container causes undefined behavior.
+         * @return Reference to the last element.
+         */
         inline mapped_type& back() noexcept { return m_order.back()->second; }
+
+        /**
+         * @brief Returns a reference to the last element in the container. Calling back on an empty container causes undefined behavior.
+         * @return Reference to the last element.
+         */
         inline mapped_type const& back() const noexcept { return m_order.back()->second; }
 
+        /**
+         * @brief Returns a reference to the first element in the container. Calling front on an empty container causes undefined behavior.
+         * @return Reference to the first element
+         */
         inline mapped_type& front() noexcept { return m_order.front()->second; }
+
+        /**
+         * @brief Returns a reference to the first element in the container. Calling front on an empty container causes undefined behavior.
+         * @return Reference to the first element
+         */
         inline mapped_type const& front() const noexcept { return m_order.front()->second; }
 
+        /**
+         * @brief Returns an iterator to the first element of the unordered_map. If the unordered_map is empty, the returned iterator will be equal to end().
+         * @return Iterator to the first element.
+         */
         inline iterator begin() noexcept { return iterator(m_order.begin()); }
+
+        /**
+         * @brief Returns an iterator to the first element of the unordered_map. If the unordered_map is empty, the returned iterator will be equal to end().
+         * @return Iterator to the first element.
+         */
         inline const_iterator begin() const noexcept { return const_iterator(m_order.begin()); }
+
+        /**
+         * @brief Returns an iterator to the first element of the unordered_map. If the unordered_map is empty, the returned iterator will be equal to end().
+         * @return Iterator to the first element.
+         */
         inline const_iterator cbegin() const noexcept { return const_iterator(m_order.cbegin()); }
 
+        /**
+         * @brief Returns an iterator to the element following the last element of the unordered_map.
+         * This element acts as a placeholder; attempting to access it results in undefined behavior.
+         * @return Iterator to the element following the last element.
+         */
         inline iterator end() noexcept { return iterator(m_order.end()); }
+
+        /**
+         * @brief Returns an iterator to the element following the last element of the unordered_map.
+         * This element acts as a placeholder; attempting to access it results in undefined behavior.
+         * @return Iterator to the element following the last element.
+         */
         inline const_iterator end() const noexcept { return const_iterator(m_order.end()); }
+
+        /**
+         * @brief Returns an iterator to the element following the last element of the unordered_map.
+         * This element acts as a placeholder; attempting to access it results in undefined behavior.
+         * @return Iterator to the element following the last element.
+         */
         inline const_iterator cend() const noexcept { return const_iterator(m_order.cend()); }
 
+        /**
+         * @brief Returns a reverse iterator to the first element of the reversed ordered_map. It corresponds to the last element of the non-reversed ordered_map.
+         * If the ordered_map is empty, the returned iterator is equal to rend().
+         * @return Reverse iterator to the first element.
+         */
         inline reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+
+        /**
+         * @brief Returns a reverse iterator to the first element of the reversed ordered_map. It corresponds to the last element of the non-reversed ordered_map.
+         * If the ordered_map is empty, the returned iterator is equal to rend().
+         * @return Reverse iterator to the first element.
+         */
         inline const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+
+        /**
+         * @brief Returns a reverse iterator to the first element of the reversed ordered_map. It corresponds to the last element of the non-reversed ordered_map.
+         * If the ordered_map is empty, the returned iterator is equal to rend().
+         * @return Reverse iterator to the first element.
+         */
         inline const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator(cend()); }
 
+        /**
+         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map. 
+         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder, 
+         * attempting to access it results in undefined behavior.
+         * @return Reverse iterator to the element following the last element.
+         */
         inline reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+
+        /**
+         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map. 
+         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder, 
+         * attempting to access it results in undefined behavior.
+         * @return Reverse iterator to the element following the last element.
+         */
         inline const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+
+        /**
+         * @brief Returns a reverse iterator to the element following the last element of the reversed ordered_map. 
+         * It corresponds to the element preceding the first element of the non-reversed ordered_map. This element acts as a placeholder, 
+         * attempting to access it results in undefined behavior.
+         * @return Reverse iterator to the element following the last element.
+         */
         inline const_reverse_iterator rcend() const noexcept { return const_reverse_iterator(cbegin()); }
     private:
         std::list<value_type*> m_order;
