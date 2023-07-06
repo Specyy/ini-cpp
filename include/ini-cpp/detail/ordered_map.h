@@ -310,7 +310,7 @@ namespace inicpp::detail {
             auto f = m_map.find(key);
             if (f != m_map.end()) return f->second;
             push_back(value_type(key, mapped_type()));
-            return back();
+            return back().second;
         }
 
         /**
@@ -322,7 +322,7 @@ namespace inicpp::detail {
             auto f = m_map.find(key);
             if (f != m_map.end()) return f->second;
             push_back(value_type(std::move(key), mapped_type()));
-            return back();
+            return back().second;
         }
 
         /**
@@ -343,25 +343,25 @@ namespace inicpp::detail {
          * @brief Returns a reference to the last element in the container. Calling back on an empty container causes undefined behavior.
          * @return Reference to the last element.
          */
-        inline mapped_type& back() noexcept { return m_order.back()->second; }
+        inline value_type& back() noexcept { return *m_order.back(); }
 
         /**
          * @brief Returns a reference to the last element in the container. Calling back on an empty container causes undefined behavior.
          * @return Reference to the last element.
          */
-        inline mapped_type const& back() const noexcept { return m_order.back()->second; }
+        inline value_type const& back() const noexcept { return *m_order.back(); }
 
         /**
          * @brief Returns a reference to the first element in the container. Calling front on an empty container causes undefined behavior.
          * @return Reference to the first element
          */
-        inline mapped_type& front() noexcept { return m_order.front()->second; }
+        inline value_type& front() noexcept { return *m_order.front(); }
 
         /**
          * @brief Returns a reference to the first element in the container. Calling front on an empty container causes undefined behavior.
          * @return Reference to the first element
          */
-        inline mapped_type const& front() const noexcept { return m_order.front()->second; }
+        inline value_type const& front() const noexcept { return *m_order.front(); }
 
         /**
          * @brief Returns an iterator to the first element of the unordered_map. If the unordered_map is empty, the returned iterator will be equal to end().
