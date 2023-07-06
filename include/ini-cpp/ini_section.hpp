@@ -7,6 +7,7 @@
 #include "detail/ordered_map.h"
 
 namespace inicpp {
+    class ini;
     class ini_section {
     public:
         typedef detail::key_iterator<std::string, ini_value> iterator;
@@ -64,6 +65,9 @@ namespace inicpp {
         inline INICPP void set_name(const std::string& name) { this->m_name = name; }
         inline INICPP void set_name(std::string&& name) noexcept { this->m_name = std::move(name); }
 
+        inline INICPP operator bool() const noexcept { return m_exists; }
+        inline INICPP bool operator !() const noexcept { return !operator bool(); }
+
         inline INICPP iterator begin() noexcept { return iterator(m_data.begin(), m_data); }
         inline INICPP const_iterator begin() const noexcept { return const_iterator(m_data.begin(), m_data); }
         inline INICPP const_iterator cbegin() const noexcept { return const_iterator(m_data.begin(), m_data); }
@@ -80,6 +84,9 @@ namespace inicpp {
     private:
         std::string m_name;
         detail::ordered_map<std::string, ini_value> m_data;
+        bool m_exists = true;
+        
+        friend class ini;
     };
 
     inline INICPP ini_section::ini_section(const std::string& name) : m_name(name) {}
