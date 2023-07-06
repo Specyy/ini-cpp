@@ -4,8 +4,16 @@
 #include "detail/ordered_map_iterator.h"
 
 #include <initializer_list>
+#include <algorithm>
 
 namespace inicpp::detail {
+    /**
+     * @brief ordered_map is an ordered container that contains key-value pairs with unique keys. Search, insertion,
+     * and removal of elements have average constant-time complexity. Internally, this uses std::unordered_map and std::list
+     * in order to provide (average) constant-time complexity.
+     * @tparam K Type of key objects.
+     * @tparam V Type of mapped objects.
+     */
     template<typename K, typename V>
     class ordered_map {
     public:
@@ -55,13 +63,14 @@ namespace inicpp::detail {
          */
         template< class InputIt >
         inline ordered_map(InputIt first, InputIt last) {
-            for (; first != last;++first) {
+            for (; first != last; ++first) {
                 push_back(*first);
             }
         }
 
         /**
-         * @brief constructs the container with the contents of the initializer list init, same as ordered_map(init.begin(), init.end()).
+         * @brief Constructs the container with the contents of the initializer list init, same as ordered_map(init.begin(), init.end()).
+         * If multiple elements in the range have keys that compare equivalent, the last one is kept.
          * @param init initializer list to initialize the elements of the container with
          */
         inline ordered_map(std::initializer_list<value_type> init) : ordered_map(init.begin(), init.end()) { }
@@ -69,7 +78,7 @@ namespace inicpp::detail {
         /**
          * @brief Copy assignment operator. Replaces the contents with a copy of the contents of other.
          * @param other another container to use as data source
-         * @return *this
+         * @return @c *this
          */
         ordered_map& operator=(const ordered_map& other) noexcept = default;
 
@@ -130,13 +139,13 @@ namespace inicpp::detail {
         inline void push_back(value_type&& value) { insert(cend(), std::move(value)); }
 
         /**
-         * @brief Removes the first element of the container. Calling pop_front on an empty container is a no-op. 
+         * @brief Removes the first element of the container. Calling pop_front on an empty container is a no-op.
          * References and iterators to the erased element are invalidated.
          */
         inline void pop_front() { if (size() > 0) { erase(m_lookup_map[m_order.front()]); } }
 
         /**
-         * @brief Removes the last element of the container. Calling pop_back on an empty container is a no-op. 
+         * @brief Removes the last element of the container. Calling pop_back on an empty container is a no-op.
          * References and iterators to the erased element are invalidated.
          */
         inline void pop_back() { if (size() > 0) { erase(m_lookup_map[m_order.back()]); } }
@@ -153,14 +162,14 @@ namespace inicpp::detail {
             if (c == m_map.end()) {
                 auto r = m_map.insert(value);
                 auto i = m_order.insert(pos.m_order_it, r.first.operator->());
-                m_lookup_map.insert(std::pair<value_type* const, typename std::list<value_type*>::const_iterator>{r.first.operator->(), i});
+                m_lookup_map[r.first.operator->()] = i;
                 return iterator(i);
             } else {
                 auto f = m_lookup_map.find(c.operator->());
                 typename std::list<value_type*>::const_iterator p_it = f->second;
                 (*p_it)->second = value.second;
                 auto i = m_order.insert(pos.m_order_it, (*p_it));
-                m_lookup_map[f->first] = i;
+                f->second = i;
                 m_order.erase(p_it);
                 return iterator(i);
             }
@@ -178,14 +187,14 @@ namespace inicpp::detail {
             if (c == m_map.end()) {
                 auto r = m_map.insert(std::move(value));
                 auto i = m_order.insert(pos.m_order_it, r.first.operator->());
-                m_lookup_map.insert(std::pair<value_type const* const, typename std::list<value_type*>::const_iterator>{r.first.operator->(), i});
+                m_lookup_map[r.first.operator->()] = i;
                 return iterator(i);
             } else {
                 auto f = m_lookup_map.find(c.operator->());
                 typename std::list<value_type*>::const_iterator p_it = f->second;
                 (*p_it)->second = std::move(value.second);
                 auto i = m_order.insert(pos.m_order_it, (*p_it));
-                m_lookup_map[f->first] = i;
+                f->second = i;
                 m_order.erase(p_it);
                 return iterator(i);
             }
