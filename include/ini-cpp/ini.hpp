@@ -27,7 +27,7 @@ namespace inicpp {
         ini& operator=(const ini&) = default;
         ini& operator=(ini&&) = default;
 
-        inline bool empty() const noexcept { return m_sections.empty(); }
+        inline bool empty() const noexcept { return m_sections.empty() || begin() == end(); }
 
         inline void clear() noexcept { m_lookup_map.clear(); m_sections.clear(); }
 
