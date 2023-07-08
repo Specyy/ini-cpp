@@ -2,6 +2,7 @@
 #define INICPP_ORDERED_MAP_H 1
 
 #include "detail/ordered_map_iterator.h"
+#include "detail/reverse_iterator.h"
 
 #include <initializer_list>
 #include <algorithm>
@@ -32,27 +33,27 @@ namespace inicpp::detail {
         typedef ordered_map_iterator<K, V> iterator;
         typedef ordered_map_iterator<K, V const> const_iterator;
 
-        typedef ordered_map_reverse_iterator<K, V> reverse_iterator;
-        typedef ordered_map_reverse_iterator<K, V const> const_reverse_iterator;
+        typedef detail::reverse_iterator<iterator> reverse_iterator;
+        typedef detail::reverse_iterator<const_iterator> const_reverse_iterator;
     private:
         typedef ordered_map<K, V> ordered_map_type;
     public:
         /**
          * @brief Default constructor. Constructs an empty container with a default-constructed allocator.
          */
-        ordered_map() noexcept = default;
+        ordered_map() = default;
 
         /**
          * @brief Copy constructor. Constructs the container with the copy of the contents of other.
          * @param other another container to be used as source to initialize the elements of the container with
          */
-        ordered_map(const ordered_map& other) noexcept = default;
+        ordered_map(const ordered_map& other) = default;
 
         /**
          * @brief Move constructor. Constructs the container with the contents of other using move semantics.
          * @param other another container to be used as source to initialize the elements of the container with
          */
-        ordered_map(ordered_map&& other) noexcept = default;
+        ordered_map(ordered_map&& other) = default;
 
         /**
          * @brief Constructs the container with the contents of the range [first, last). Sets max_load_factor() to 1.0.
@@ -80,7 +81,7 @@ namespace inicpp::detail {
          * @param other another container to use as data source
          * @return @c *this
          */
-        ordered_map& operator=(const ordered_map& other) noexcept = default;
+        ordered_map& operator=(const ordered_map& other) = default;
 
         /**
          * @brief Move assignment operator. Replaces the contents with those of other using move semantics (i.e. the data in other is moved from other into this container).
@@ -88,7 +89,7 @@ namespace inicpp::detail {
          * @param other another container to use as data source
          * @return *this
          */
-        ordered_map& operator=(ordered_map&& other) noexcept = default;
+        ordered_map& operator=(ordered_map&& other) = default;
 
         /**
          * @brief Checks if the container has no elements, i.e. whether begin() == end().
@@ -152,7 +153,7 @@ namespace inicpp::detail {
 
         /**
          * @brief Inserts element(s) into the container. If the container doesn't already contain an element with an equivalent key,
-         * the element is inserted at the desired position. If the element already exists within the container, its is relocated and has its value reassigned.
+         * the element is inserted at the desired position. If the element already exists within the container, it is relocated and has its value reassigned.
          * @param pos iterator before which the content will be inserted (pos may be the end() iterator)
          * @param value element value to insert
          * @return Returns an iterator to the inserted element
@@ -461,7 +462,6 @@ namespace inicpp::detail {
         std::unordered_map<value_type const*, typename std::list<value_type*>::const_iterator> m_lookup_map;
 
         friend struct ordered_map_iterator<K, V>;
-        friend struct ordered_map_reverse_iterator<K, V>;
     };
 }
 #endif
