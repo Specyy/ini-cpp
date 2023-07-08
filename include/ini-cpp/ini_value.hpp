@@ -9,6 +9,8 @@
 #include <optional>
 
 namespace inicpp {
+    class ini;
+    class ini_section;
     class ini_value {
     public:
         constexpr ini_value() noexcept = default;
@@ -18,14 +20,13 @@ namespace inicpp {
         constexpr inline INICPP ini_value(std::string&& data) noexcept;
 
         constexpr inline INICPP bool has_value() const noexcept { return m_data.has_value(); }
-        constexpr inline INICPP operator bool() const noexcept { return has_value(); }
+        constexpr inline INICPP explicit operator bool() const noexcept { return has_value(); }
         constexpr inline INICPP bool operator !() const noexcept { return !operator bool(); }
 
-        constexpr inline INICPP std::string& get_value() { return m_data.value(); }
         constexpr inline INICPP const std::string& get_value() const { return m_data.value(); }
 
-        inline INICPP void set_value(const std::string& data) { this->m_data = data; }
-        inline INICPP void set_value(std::string&& data) noexcept { this->m_data = std::move(data); }
+        INICPP void set_value(const std::string& data);
+        INICPP void set_value(std::string&& data) noexcept;
 
         template<typename T>
         INICPP T as() const;
@@ -40,6 +41,10 @@ namespace inicpp {
         INICPP ini_value& operator =(T);
     private:
         std::optional<std::string> m_data;
+        ini_section* m_section = nullptr;
+        
+        friend class ini_section;
+        friend class ini;
     };
 
     constexpr inline INICPP ini_value::ini_value(const std::string& data) : m_data(data) {}
