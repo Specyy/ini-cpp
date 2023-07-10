@@ -324,7 +324,7 @@ namespace inicpp {
                             throw parser_exception(std::to_string(line_number) + " Expected delimeter before end of line");
                             return;
                         }
-                        sec[std::string(accessible_line.substr(0, delim_pos))].set_value(std::string(accessible_line.substr(delim_pos + 1)));
+                        sec[std::string(trim(accessible_line.substr(0, delim_pos)))].set_value(std::string(trim(accessible_line.substr(delim_pos + 1))));
                     }
                 } else {
                     bool found = false;
