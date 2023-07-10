@@ -1,8 +1,8 @@
 #ifndef INICPP_ORDERED_MAP_H
 #define INICPP_ORDERED_MAP_H 1
 
-#include "detail/ordered_map_iterator.h"
-#include "detail/reverse_iterator.h"
+#include "ordered_map_iterator.h"
+#include "reverse_iterator.h"
 
 #include <initializer_list>
 #include <algorithm>
