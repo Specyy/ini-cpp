@@ -150,11 +150,11 @@ namespace inicpp {
         return out;
     }
 
-    extern INICPP template class detail::section_iterator<ini_section>;
-    extern INICPP template class detail::section_iterator<ini_section const>;
+    extern template class detail::section_iterator<ini_section>;
+    extern template class detail::section_iterator<ini_section const>;
 
-    extern INICPP template class detail::reverse_iterator<detail::section_iterator<ini_section>>;
-    extern INICPP template class detail::reverse_iterator<detail::section_iterator<ini_section const>>;
+    extern template class detail::reverse_iterator<detail::section_iterator<ini_section>>;
+    extern template class detail::reverse_iterator<detail::section_iterator<ini_section const>>;
 }
 
 #endif

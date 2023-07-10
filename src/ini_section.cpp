@@ -44,11 +44,11 @@ namespace inicpp {
         return this->back().second;
     }
 
-    INICPP template class detail::key_iterator<std::string, ini_value>;
-    INICPP template class detail::key_iterator<std::string, const ini_value>;
+    template class detail::key_iterator<std::string, ini_value>;
+    template class detail::key_iterator<std::string, const ini_value>;
 
-    INICPP template class detail::reverse_iterator<detail::key_iterator<std::string, ini_value>>;
-    INICPP template class detail::reverse_iterator<detail::key_iterator<std::string, const ini_value>>;
+    template class detail::reverse_iterator<detail::key_iterator<std::string, ini_value>>;
+    template class detail::reverse_iterator<detail::key_iterator<std::string, const ini_value>>;
 
-    INICPP template class detail::ordered_map<std::string, ini_value>;
+    template class detail::ordered_map<std::string, ini_value>;
 }

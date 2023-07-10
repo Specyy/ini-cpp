@@ -244,13 +244,13 @@ namespace inicpp {
     inline INICPP ini_section::ini_section(const std::string& name) { this->set_name(name); }
     inline INICPP ini_section::ini_section(std::string&& name) { this->set_name(std::move(name)); }
 
-    extern INICPP template class detail::key_iterator<std::string, ini_value>;
-    extern INICPP template class detail::key_iterator<std::string, const ini_value>;
+    extern template class detail::key_iterator<std::string, ini_value>;
+    extern template class detail::key_iterator<std::string, const ini_value>;
 
-    extern INICPP template class detail::reverse_iterator<detail::key_iterator<std::string, ini_value>>;
-    extern INICPP template class detail::reverse_iterator<detail::key_iterator<std::string, const ini_value>>;
+    extern template class detail::reverse_iterator<detail::key_iterator<std::string, ini_value>>;
+    extern template class detail::reverse_iterator<detail::key_iterator<std::string, const ini_value>>;
 
-    extern INICPP template class detail::ordered_map<std::string, ini_value>;
+    extern template class detail::ordered_map<std::string, ini_value>;
 }
 
 #endif
