@@ -40,6 +40,7 @@ namespace inicpp {
 
         inline bool empty() const noexcept { return m_sections.empty() || begin() == end(); }
 
+        // Clears temporary inexistent sections
         inline void clear() noexcept { m_lookup_map.clear(); m_sections.clear(); }
 
         inline void push_front(const ini_section& value) { insert(cbegin(), value); }
@@ -64,7 +65,6 @@ namespace inicpp {
 
         INICPP bool contains(const std::string& name) const;
 
-        // Does not update previously created iterators
         INICPP ini_section& insert(const_iterator pos, ini_section const& sec);
         INICPP ini_section& insert(const_iterator pos, ini_section&& sec);
 
