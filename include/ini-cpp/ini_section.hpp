@@ -22,8 +22,24 @@ namespace inicpp {
         typedef detail::reverse_iterator<const_iterator> const_reverse_iterator;
     public:
         ini_section() = default;
+        inline INICPP ini_section(const ini_section&);
+        inline INICPP ini_section(ini_section&&);
         inline INICPP ini_section(const std::string& name);
         inline INICPP ini_section(std::string&& name);
+
+        inline INICPP ini_section& operator=(const ini_section& other) {
+            this->m_data = other.m_data;
+            this->m_exists = (this->m_ini && !other.empty()) || this->m_exists;
+            this->set_name(other.m_name);
+            return *this;
+        }
+
+        inline INICPP ini_section& operator=(ini_section&& other) {
+            this->m_data = std::move(other.m_data);
+            this->m_exists = (this->m_ini && !other.empty()) || this->m_exists;
+            this->set_name(std::move(other.m_name));
+            return *this;
+        }
 
         inline INICPP bool empty() const noexcept { return m_data.empty() || begin() == end(); }
 
@@ -139,6 +155,13 @@ namespace inicpp {
         }
 
         /**
+         * @brief Removes a key from the ini section
+         * @param key The key to remove
+         * @return True if the element has been removed, false if it did not exist
+         */
+        inline INICPP bool erase(const std::string& key) { return remove(key); }
+
+        /**
          * @brief Checks whether the section contains the specified key
          * @param key Name of the key to check
          * @return True if the sections contains the underlying key, false otherwise.
@@ -215,8 +238,11 @@ namespace inicpp {
         friend class ini_value;
     };
 
-    inline INICPP ini_section::ini_section(const std::string& name) : m_name(name) {}
-    inline INICPP ini_section::ini_section(std::string&& name) : m_name(std::move(name)) {}
+    inline INICPP ini_section::ini_section(const ini_section& other) : m_data(other.m_data) { this->set_name(other.m_name); }
+    inline INICPP ini_section::ini_section(ini_section&& other) : m_data(std::move(other.m_data)) { this->set_name(std::move(other.m_name)); }
+
+    inline INICPP ini_section::ini_section(const std::string& name) { this->set_name(name); }
+    inline INICPP ini_section::ini_section(std::string&& name) { this->set_name(std::move(name)); }
 
     extern INICPP template class detail::key_iterator<std::string, ini_value>;
     extern INICPP template class detail::key_iterator<std::string, const ini_value>;

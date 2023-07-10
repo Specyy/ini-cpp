@@ -10,6 +10,10 @@
 #include <unordered_map>
 #include <list>
 #include <type_traits>
+#include <istream>
+#include <ostream>
+#include <sstream>
+#include <unordered_set>
 
 namespace inicpp {
     class ini {
@@ -26,6 +30,13 @@ namespace inicpp {
 
         ini& operator=(const ini&) = default;
         ini& operator=(ini&&) = default;
+
+        INICPP void read(std::istream& in);
+        inline INICPP void read(const std::string& s) { std::istringstream is(s); return read(is); }
+        inline INICPP void read(std::string&& s) { std::istringstream is(std::move(s)); return read(is); }
+
+        INICPP void write(std::ostream& out) const;
+        inline INICPP void write(std::string& out) const { std::ostringstream os; write(os);out = os.str(); }
 
         inline bool empty() const noexcept { return m_sections.empty() || begin() == end(); }
 
@@ -56,6 +67,28 @@ namespace inicpp {
         // Does not update previously created iterators
         INICPP ini_section& insert(const_iterator pos, ini_section const& sec);
         INICPP ini_section& insert(const_iterator pos, ini_section&& sec);
+
+        inline INICPP iterator remove(const_iterator pos) {
+            if (pos == cend() || !contains(pos->get_name())) return end();
+            m_lookup_map.erase(pos->get_name());
+            auto next = m_sections.erase(pos.m_cur);
+            return iterator(next, m_sections);
+        }
+
+        /**
+         * @brief Removes a key from the ini section
+         * @param key The key to remove
+         * @return True if the element has been removed, false if it did not exist
+         */
+        inline INICPP iterator erase(const_iterator pos) { return remove(pos); }
+
+        inline INICPP bool remove(const std::string& key) {
+            if (!contains(key)) { return false; }
+            remove(const_iterator(m_lookup_map.find(key)->second, m_sections));
+            return true;
+        }
+
+        inline INICPP bool erase(const std::string& key) { return remove(key); }
 
         inline INICPP ini_section& back() noexcept { return *--end(); }
 
@@ -89,12 +122,33 @@ namespace inicpp {
 
         inline INICPP const_reverse_iterator rcend() const noexcept { return const_reverse_iterator(cbegin()); }
 
+        inline INICPP std::unordered_set<std::string>& get_comment_handles() noexcept { return this->m_comment_handles; }
+        inline INICPP std::unordered_set<std::string> const& get_comment_handles() const noexcept { return this->m_comment_handles; }
+
+        inline INICPP std::string const& get_delimeter() const noexcept { return this->m_delim; }
+
+        inline INICPP void set_delimeter(const std::string& new_delim) noexcept { this->m_delim = new_delim; }
+
+        inline INICPP void set_delimeter(std::string&& new_delim) noexcept { this->m_delim = std::move(new_delim); }
+
     private:
         mutable std::unordered_map<std::string, typename std::list<ini_section>::iterator> m_lookup_map;
         mutable std::list<ini_section> m_sections;
+        std::unordered_set<std::string> m_comment_handles = { "//", "#", ";" };
+        std::string m_delim = "=";
 
         friend class ini_section;
     };
+
+    inline INICPP std::istream& operator>>(std::istream& in, ini& ini) {
+        ini.read(in);
+        return in;
+    }
+
+    inline INICPP std::ostream& operator<<(std::ostream& out, const ini& ini) {
+        ini.write(out);
+        return out;
+    }
 
     extern INICPP template class detail::section_iterator<ini_section>;
     extern INICPP template class detail::section_iterator<ini_section const>;

@@ -10,6 +10,7 @@ set(SOURCE_FILES
     src/ini_value.cpp
     src/ini_section.cpp
     src/ini.cpp
+    src/parser_exception.cpp
 )
 
 # Set the executable file for the project (should change to lib later)
