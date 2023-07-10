@@ -1,7 +1,7 @@
 #ifndef INICPP_KEY_ITERATOR_H
 #define INICPP_KEY_ITERATOR_H 1
 
-#include "detail/ordered_map.h"
+#include "ordered_map.h"
 
 #include <stdexcept>
 #include <type_traits>
