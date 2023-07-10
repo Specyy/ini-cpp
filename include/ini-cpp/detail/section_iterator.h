@@ -22,12 +22,22 @@ namespace inicpp {
         public:
             section_iterator(const section_iterator_type&) noexcept = default;
             section_iterator(section_iterator_type&&) noexcept = default;
-            inline section_iterator(impl_iterator cur, impl_iterator begin, impl_iterator end) noexcept : m_cur(cur), m_begin(begin), m_end(end) { if (m_cur != end && !(*m_cur)) { operator++(); m_begin = m_cur; } }
+
+            template<typename T1, typename = std::enable_if_t<std::is_const_v<value_type>&& std::is_same_v<std::remove_reference_t<T1>, std::remove_const_t<value_type>>>>
+            inline section_iterator(const section_iterator<T1>& other) : m_cur(other.m_cur), m_begin(other.m_begin), m_end(other.m_end) { if (m_cur != m_end && !(*m_cur)) { operator++(); m_begin = m_cur; } }
+
+            inline section_iterator(impl_iterator cur, impl_iterator begin, impl_iterator end) noexcept : m_cur(cur), m_begin(begin), m_end(end) { if (m_cur != m_end && !(*m_cur)) { operator++(); m_begin = m_cur; } }
             inline section_iterator(impl_iterator cur, impl_list& list) noexcept : section_iterator(cur, list.begin(), list.end()) {}
             inline section_iterator(impl_list& list) noexcept : section_iterator_type(list.begin(), list) {}
 
             inline bool operator==(const section_iterator_type& other) const noexcept { return this->m_cur == other.m_cur; }
             inline bool operator!=(const section_iterator_type& other) const noexcept { return !operator==(other); }
+
+            template<typename T1, typename = std::enable_if_t<std::is_const_v<value_type>&& std::is_same_v<std::remove_reference_t<T1>, std::remove_const_t<value_type>>>>
+            inline bool operator==(const section_iterator<T1>& other) const noexcept { return this->m_cur == other.m_cur; }
+
+            template<typename T1, typename = std::enable_if_t<std::is_const_v<value_type>&& std::is_same_v<std::remove_reference_t<T1>, std::remove_const_t<value_type>>>>
+            inline bool operator!=(const section_iterator<T1>& other) const noexcept { return !operator==<T1>(other); }
 
             section_iterator_type& operator=(const section_iterator_type&) noexcept = default;
             section_iterator_type& operator=(section_iterator_type&&) noexcept = default;
@@ -71,6 +81,8 @@ namespace inicpp {
             const impl_iterator m_end;
 
             friend class inicpp::ini;
+            friend class section_iterator<std::remove_const_t<value_type>>;
+            friend class section_iterator<value_type const>;
         };
     }
 }

@@ -31,12 +31,21 @@ namespace inicpp {
         public:
             key_iterator(const key_iterator_type&) noexcept = default;
             key_iterator(key_iterator_type&&) noexcept = default;
+            template<typename V1, typename = std::enable_if_t<std::is_const_v<value_type>&& std::is_same_v<std::remove_reference_t<V1>, std::remove_const_t<value_type>>>>
+            inline key_iterator(const key_iterator<K, V1>& other) : m_cur(other.m_cur), m_begin(other.m_begin), m_end(other.m_end) { if (m_cur != m_end && !(*m_cur)) { operator++(); m_begin = m_cur; } }
+
             inline key_iterator(impl_iterator cur, impl_iterator begin, impl_iterator end) noexcept : m_cur(cur), m_begin(begin), m_end(end) { if (m_cur != end && !(m_cur->second)) { operator++(); m_begin = m_cur; } }
             inline key_iterator(impl_iterator cur, impl_map& map) noexcept : key_iterator(cur, map.begin(), map.end()) {}
             inline key_iterator(impl_map& map) noexcept : key_iterator(map.begin(), map) {}
 
             inline bool operator==(const key_iterator_type& other) const noexcept { return this->m_cur == other.m_cur; }
             inline bool operator!=(const key_iterator_type& other) const noexcept { return !operator==(other); }
+
+            template<typename V1, typename = std::enable_if_t<std::is_const_v<value_type>&& std::is_same_v<std::remove_reference_t<V1>, std::remove_const_t<value_type>>>>
+            inline bool operator==(const key_iterator<K, V1>& other) const noexcept { return this->m_cur == other.m_cur; }
+
+            template<typename V1, typename = std::enable_if_t<std::is_const_v<value_type>&& std::is_same_v<std::remove_reference_t<V1>, std::remove_const_t<value_type>>>>
+            inline bool operator!=(const key_iterator<K, V1>& other) const noexcept { return !operator==<V1>(other); }
 
             key_iterator_type& operator=(const key_iterator_type&) noexcept = default;
             key_iterator_type& operator=(key_iterator_type&&) noexcept = default;
@@ -80,6 +89,8 @@ namespace inicpp {
             const impl_iterator m_end;
 
             friend class inicpp::ini_section;
+            friend class key_iterator<K, std::remove_const_t<value_type>>;
+            friend class key_iterator<K, value_type const>;
         };
     }
 }
