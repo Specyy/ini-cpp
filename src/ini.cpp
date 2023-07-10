@@ -273,20 +273,21 @@ namespace inicpp {
                     for (std::string const& comment_handle : m_comment_handles) {
                         std::size_t const old_pos = comment_handle_pos;
                         comment_handle_pos = std::min(trimmed_line.find(comment_handle, 1), old_pos);
+                        if (comment_handle_pos == 0) break;
                     }
 
                     std::size_t const end_section_pos = trimmed_line.find(']', 1);
                     std::string_view name = trim(trimmed_line.substr(1, std::min(comment_handle_pos, end_section_pos) - 1));
 
-                    if (name.length() == 0) {
-                        // error, expected section name
-                        in.setstate(std::ios_base::failbit);
-                        throw parser_exception(std::to_string(line_number) + ":1 Expected valid section name");
-                        return;
-                    } else if (end_section_pos > comment_handle_pos || end_section_pos == std::string_view::npos) {
+                    if (end_section_pos > comment_handle_pos || end_section_pos == std::string_view::npos) {
                         // error, expected ']' to end section name
                         in.setstate(std::ios_base::failbit);
                         throw parser_exception(std::to_string(line_number) + " Expected ']' before end of line");
+                        return;
+                    } else if (name.length() == 0) {
+                        // error, expected section name
+                        in.setstate(std::ios_base::failbit);
+                        throw parser_exception(std::to_string(line_number) + ":2 Expected valid section name before ']'");
                         return;
                     }
 
@@ -314,9 +315,12 @@ namespace inicpp {
 
                         for (std::string const& comment_handle : m_comment_handles) {
                             std::size_t const old_pos = comment_handle_pos;
-                            comment_handle_pos = std::min(trimmed_line.find(comment_handle, 1), old_pos);
+                            comment_handle_pos = std::min(trimmed_line.find(comment_handle), old_pos);
+                            if (comment_handle_pos == 0) break;
                         }
                         std::string_view accessible_line = trimmed_line.substr(0, comment_handle_pos);
+                        if (accessible_line.length() == 0) continue;
+
                         auto delim_pos = accessible_line.find(this->m_delim);
                         if (delim_pos == std::string_view::npos) {
                             // error, expected delimeter
