@@ -18,6 +18,9 @@ namespace inicpp::detail {
         inline bool operator==(const reverse_iterator_type& other) const { return this->m_it == other.m_it; }
         inline bool operator!=(const reverse_iterator_type& other) const { return !operator==(other); }
 
+        inline bool operator==(iterator_type const& iter) const { auto tmp = m_it; return (--tmp) == iter; }
+        inline bool operator!=(iterator_type const& iter) const { return !operator==(iter); }
+
         inline reference_type operator*() const { auto tmp = m_it; return (--tmp).operator *(); }
         inline pointer_type operator->() const { auto tmp = m_it; return (--tmp).operator->(); }
 
