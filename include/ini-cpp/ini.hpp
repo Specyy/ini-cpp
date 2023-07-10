@@ -32,11 +32,11 @@ namespace inicpp {
         ini& operator=(ini&&) = default;
 
         INICPP void read(std::istream& in);
-        inline INICPP void read(const std::string& s) { std::istringstream is(s); return read(is); }
-        inline INICPP void read(std::string&& s) { std::istringstream is(std::move(s)); return read(is); }
+        inline void read(const std::string& s) { std::istringstream is(s); return read(is); }
+        inline void read(std::string&& s) { std::istringstream is(std::move(s)); return read(is); }
 
         INICPP void write(std::ostream& out) const;
-        inline INICPP void write(std::string& out) const { std::ostringstream os; write(os);out = os.str(); }
+        inline void write(std::string& out) const { std::ostringstream os; write(os);out = os.str(); }
 
         inline bool empty() const noexcept { return m_sections.empty() || begin() == end(); }
 
@@ -56,11 +56,11 @@ namespace inicpp {
         INICPP ini_section const& find(const std::string& name) const;
         INICPP ini_section const& find(std::string&& name) const;
 
-        inline INICPP ini_section& operator[](const std::string& key) { return find(key); }
-        inline INICPP ini_section& operator[](std::string&& key) { return find(std::move(key)); }
+        inline ini_section& operator[](const std::string& key) { return find(key); }
+        inline ini_section& operator[](std::string&& key) { return find(std::move(key)); }
 
-        inline INICPP const ini_section& operator[](const std::string& key) const { return find(key); }
-        inline INICPP const ini_section& operator[](std::string&& key) const { return find(std::move(key)); }
+        inline const ini_section& operator[](const std::string& key) const { return find(key); }
+        inline const ini_section& operator[](std::string&& key) const { return find(std::move(key)); }
 
         INICPP bool contains(const std::string& name) const;
 
@@ -68,7 +68,7 @@ namespace inicpp {
         INICPP ini_section& insert(const_iterator pos, ini_section const& sec);
         INICPP ini_section& insert(const_iterator pos, ini_section&& sec);
 
-        inline INICPP iterator remove(const_iterator pos) {
+        inline iterator remove(const_iterator pos) {
             if (pos == cend() || !contains(pos->get_name())) return end();
             m_lookup_map.erase(pos->get_name());
             auto next = m_sections.erase(pos.m_cur);
@@ -80,56 +80,56 @@ namespace inicpp {
          * @param key The key to remove
          * @return True if the element has been removed, false if it did not exist
          */
-        inline INICPP iterator erase(const_iterator pos) { return remove(pos); }
+        inline iterator erase(const_iterator pos) { return remove(pos); }
 
-        inline INICPP bool remove(const std::string& key) {
+        inline bool remove(const std::string& key) {
             if (!contains(key)) { return false; }
             remove(const_iterator(m_lookup_map.find(key)->second, m_sections));
             return true;
         }
 
-        inline INICPP bool erase(const std::string& key) { return remove(key); }
+        inline bool erase(const std::string& key) { return remove(key); }
 
-        inline INICPP ini_section& back() noexcept { return *--end(); }
+        inline ini_section& back() noexcept { return *--end(); }
 
-        inline INICPP ini_section const& back() const noexcept { return *--end(); }
+        inline ini_section const& back() const noexcept { return *--end(); }
 
-        inline INICPP ini_section& front() noexcept { return *begin(); }
+        inline ini_section& front() noexcept { return *begin(); }
 
-        inline INICPP ini_section const& front() const noexcept { return *begin(); }
+        inline ini_section const& front() const noexcept { return *begin(); }
 
-        inline INICPP iterator begin() noexcept { return iterator(m_sections.begin(), m_sections); }
+        inline iterator begin() noexcept { return iterator(m_sections.begin(), m_sections); }
 
-        inline INICPP const_iterator begin() const noexcept { return const_iterator(m_sections.begin(), m_sections); }
+        inline const_iterator begin() const noexcept { return const_iterator(m_sections.begin(), m_sections); }
 
-        inline INICPP const_iterator cbegin() const noexcept { return const_iterator(m_sections.cbegin(), m_sections); }
+        inline const_iterator cbegin() const noexcept { return const_iterator(m_sections.cbegin(), m_sections); }
 
-        inline INICPP iterator end() noexcept { return iterator(m_sections.end(), m_sections); }
+        inline iterator end() noexcept { return iterator(m_sections.end(), m_sections); }
 
-        inline INICPP const_iterator end() const noexcept { return const_iterator(m_sections.end(), m_sections); }
+        inline const_iterator end() const noexcept { return const_iterator(m_sections.end(), m_sections); }
 
-        inline INICPP const_iterator cend() const noexcept { return const_iterator(m_sections.cend(), m_sections); }
+        inline const_iterator cend() const noexcept { return const_iterator(m_sections.cend(), m_sections); }
 
-        inline INICPP reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+        inline reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
 
-        inline INICPP const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+        inline const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
 
-        inline INICPP const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator(cend()); }
+        inline const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator(cend()); }
 
-        inline INICPP reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+        inline reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 
-        inline INICPP const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+        inline const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
 
-        inline INICPP const_reverse_iterator rcend() const noexcept { return const_reverse_iterator(cbegin()); }
+        inline const_reverse_iterator rcend() const noexcept { return const_reverse_iterator(cbegin()); }
 
-        inline INICPP std::unordered_set<std::string>& get_comment_handles() noexcept { return this->m_comment_handles; }
-        inline INICPP std::unordered_set<std::string> const& get_comment_handles() const noexcept { return this->m_comment_handles; }
+        inline std::unordered_set<std::string>& get_comment_handles() noexcept { return this->m_comment_handles; }
+        inline std::unordered_set<std::string> const& get_comment_handles() const noexcept { return this->m_comment_handles; }
 
-        inline INICPP std::string const& get_delimeter() const noexcept { return this->m_delim; }
+        inline std::string const& get_delimeter() const noexcept { return this->m_delim; }
 
-        inline INICPP void set_delimeter(const std::string& new_delim) noexcept { this->m_delim = new_delim; }
+        inline void set_delimeter(const std::string& new_delim) noexcept { this->m_delim = new_delim; }
 
-        inline INICPP void set_delimeter(std::string&& new_delim) noexcept { this->m_delim = std::move(new_delim); }
+        inline void set_delimeter(std::string&& new_delim) noexcept { this->m_delim = std::move(new_delim); }
 
     private:
         mutable std::unordered_map<std::string, typename std::list<ini_section>::iterator> m_lookup_map;
@@ -140,21 +140,15 @@ namespace inicpp {
         friend class ini_section;
     };
 
-    inline INICPP std::istream& operator>>(std::istream& in, ini& ini) {
+    inline std::istream& operator>>(std::istream& in, ini& ini) {
         ini.read(in);
         return in;
     }
 
-    inline INICPP std::ostream& operator<<(std::ostream& out, const ini& ini) {
+    inline std::ostream& operator<<(std::ostream& out, const ini& ini) {
         ini.write(out);
         return out;
     }
-
-    extern template class detail::section_iterator<ini_section>;
-    extern template class detail::section_iterator<ini_section const>;
-
-    extern template class detail::reverse_iterator<detail::section_iterator<ini_section>>;
-    extern template class detail::reverse_iterator<detail::section_iterator<ini_section const>>;
 }
 
 #endif

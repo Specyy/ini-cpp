@@ -351,10 +351,4 @@ namespace inicpp {
             out << '\n';
         }
     }
-
-    template class detail::section_iterator<ini_section>;
-    template class detail::section_iterator<ini_section const>;
-
-    template class detail::reverse_iterator<detail::section_iterator<ini_section>>;
-    template class detail::reverse_iterator<detail::section_iterator<ini_section const>>;
 }

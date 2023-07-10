@@ -22,33 +22,33 @@ namespace inicpp {
         typedef detail::reverse_iterator<const_iterator> const_reverse_iterator;
     public:
         ini_section() = default;
-        inline INICPP ini_section(const ini_section&);
-        inline INICPP ini_section(ini_section&&);
-        inline INICPP ini_section(const std::string& name);
-        inline INICPP ini_section(std::string&& name);
+        inline ini_section(const ini_section&);
+        inline ini_section(ini_section&&);
+        inline ini_section(const std::string& name);
+        inline ini_section(std::string&& name);
 
-        inline INICPP ini_section& operator=(const ini_section& other) {
+        inline ini_section& operator=(const ini_section& other) {
             this->m_data = other.m_data;
             this->m_exists = (this->m_ini && !other.empty()) || this->m_exists;
             this->set_name(other.m_name);
             return *this;
         }
 
-        inline INICPP ini_section& operator=(ini_section&& other) {
+        inline ini_section& operator=(ini_section&& other) {
             this->m_data = std::move(other.m_data);
             this->m_exists = (this->m_ini && !other.empty()) || this->m_exists;
             this->set_name(std::move(other.m_name));
             return *this;
         }
 
-        inline INICPP bool empty() const noexcept { return m_data.empty() || begin() == end(); }
+        inline bool empty() const noexcept { return m_data.empty() || begin() == end(); }
 
         /**
          * @brief Attempts to find a key within the ini section. If the key does not exist, an invalid @c ini_value is returned.
          * @param key The key to find
          * @return A valid or invalid ini_value
          */
-        inline INICPP ini_value& find(const std::string& key) {
+        inline ini_value& find(const std::string& key) {
             auto& v = m_data[key];
             v.m_section = this;
             return v;
@@ -59,7 +59,7 @@ namespace inicpp {
          * @param key The key to find
          * @return A valid or invalid ini_value
          */
-        inline INICPP ini_value& find(std::string&& key) {
+        inline ini_value& find(std::string&& key) {
             auto& v = m_data[std::move(key)];
             v.m_section = this;
             return v;
@@ -79,13 +79,13 @@ namespace inicpp {
          */
         INICPP const ini_value& find(std::string&& key) const;
 
-        inline INICPP void push_front(const typename detail::ordered_map<std::string, ini_value>::value_type& value) { insert(cbegin(), value); }
+        inline void push_front(const typename detail::ordered_map<std::string, ini_value>::value_type& value) { insert(cbegin(), value); }
 
-        inline INICPP void push_front(typename detail::ordered_map<std::string, ini_value>::value_type&& value) { insert(cbegin(), std::move(value)); }
+        inline void push_front(typename detail::ordered_map<std::string, ini_value>::value_type&& value) { insert(cbegin(), std::move(value)); }
 
-        inline INICPP void push_back(const typename detail::ordered_map<std::string, ini_value>::value_type& value) { insert(cend(), value); }
+        inline void push_back(const typename detail::ordered_map<std::string, ini_value>::value_type& value) { insert(cend(), value); }
 
-        inline INICPP void push_back(typename detail::ordered_map<std::string, ini_value>::value_type&& value) { insert(cend(), std::move(value)); }
+        inline void push_back(typename detail::ordered_map<std::string, ini_value>::value_type&& value) { insert(cend(), std::move(value)); }
 
         /**
          * @brief Associates a key with a particular value. If the underlying key already exists, its value is overridden.
@@ -93,7 +93,7 @@ namespace inicpp {
          * @param value The value to assign
          * @return The assigned value
          */
-        inline INICPP ini_value& insert(const_iterator pos, const typename detail::ordered_map<std::string, ini_value>::value_type& value) {
+        inline ini_value& insert(const_iterator pos, const typename detail::ordered_map<std::string, ini_value>::value_type& value) {
             auto i = m_data.insert(pos.m_cur, value);
             i->second.m_section = this;
             m_exists = m_exists || i->second.has_value();
@@ -106,7 +106,7 @@ namespace inicpp {
         * @param value The value to assign
         * @return The assigned value
         */
-        inline INICPP ini_value& insert(const_iterator pos, typename detail::ordered_map<std::string, ini_value>::value_type&& value) {
+        inline ini_value& insert(const_iterator pos, typename detail::ordered_map<std::string, ini_value>::value_type&& value) {
             auto i = m_data.insert(pos.m_cur, std::move(value));
             i->second.m_section = this;
             m_exists = m_exists || i->second.has_value();
@@ -119,7 +119,7 @@ namespace inicpp {
          * @param value The value to replace
          * @return The old value associated with this key
          */
-        inline INICPP ini_value replace(const std::string& key, const ini_value& value) {
+        inline ini_value replace(const std::string& key, const ini_value& value) {
             if (!contains(key)) { throw std::invalid_argument("ini_section::replace"); }
             auto f = m_data.find(key);
             ini_value old = f->second;
@@ -134,7 +134,7 @@ namespace inicpp {
          * @param value The value to replace
          * @return The old value associated with this key
          */
-        inline INICPP ini_value replace(const std::string& key, ini_value&& value) {
+        inline ini_value replace(const std::string& key, ini_value&& value) {
             if (!contains(key)) { throw std::invalid_argument("ini_section::replace"); }
             auto f = m_data.find(key);
             ini_value old = f->second;
@@ -148,7 +148,7 @@ namespace inicpp {
          * @param key The key to remove
          * @return True if the element has been removed, false if it did not exist
          */
-        inline INICPP bool remove(const std::string& key) {
+        inline bool remove(const std::string& key) {
             if (!contains(key)) { return false; }
             m_data.erase(key);
             return true;
@@ -159,14 +159,14 @@ namespace inicpp {
          * @param key The key to remove
          * @return True if the element has been removed, false if it did not exist
          */
-        inline INICPP bool erase(const std::string& key) { return remove(key); }
+        inline bool erase(const std::string& key) { return remove(key); }
 
         /**
          * @brief Checks whether the section contains the specified key
          * @param key Name of the key to check
          * @return True if the sections contains the underlying key, false otherwise.
          */
-        inline INICPP bool contains(const std::string& key) const {
+        inline bool contains(const std::string& key) const {
             auto f = m_data.find(key);
             return f != m_data.end() && (f->second);
         }
@@ -174,13 +174,13 @@ namespace inicpp {
         /**
          * @brief Clears the contents of the section.
          */
-        inline INICPP void clear() noexcept { return m_data.clear(); }
+        inline void clear() noexcept { return m_data.clear(); }
 
         /**
          * @brief Retrieves the name of the ini section
          * @return The name of the section
          */
-        inline INICPP const std::string& get_name() const noexcept { return this->m_name; }
+        inline const std::string& get_name() const noexcept { return this->m_name; }
 
         /**
          * @brief Changes the name of the ini section. If a section with the corresponding name already exists, an exception of type @c std::invalid_argument is thrown.
@@ -200,34 +200,34 @@ namespace inicpp {
          * @brief Checks whether the ini section is in a valid state (whether it exists inside the ini file). This function returns true for a default constructed @c ini_section.
          * @return True if the object is valid, false otherwise
          */
-        inline INICPP explicit operator bool() const noexcept { return m_exists; }
-        inline INICPP bool operator !() const noexcept { return !operator bool(); }
+        inline explicit operator bool() const noexcept { return m_exists; }
+        inline bool operator !() const noexcept { return !operator bool(); }
 
-        inline INICPP ini_value& operator[](const std::string& key) { return find(key); }
-        inline INICPP ini_value& operator[](std::string&& key) { return find(std::move(key)); }
+        inline ini_value& operator[](const std::string& key) { return find(key); }
+        inline ini_value& operator[](std::string&& key) { return find(std::move(key)); }
 
-        inline INICPP const ini_value& operator[](const std::string& key) const { return find(key); }
-        inline INICPP const ini_value& operator[](std::string&& key) const { return find(std::move(key)); }
+        inline const ini_value& operator[](const std::string& key) const { return find(key); }
+        inline const ini_value& operator[](std::string&& key) const { return find(std::move(key)); }
 
-        inline INICPP typename detail::ordered_map<std::string, ini_value>::value_type& front() noexcept { return *begin(); }
-        inline INICPP typename detail::ordered_map<std::string, ini_value>::value_type const& front() const noexcept { return *begin(); }
+        inline typename detail::ordered_map<std::string, ini_value>::value_type& front() noexcept { return *begin(); }
+        inline typename detail::ordered_map<std::string, ini_value>::value_type const& front() const noexcept { return *begin(); }
 
-        inline INICPP typename detail::ordered_map<std::string, ini_value>::value_type& back() noexcept { return *--end(); }
-        inline INICPP typename detail::ordered_map<std::string, ini_value>::value_type const& back() const noexcept { return *--end(); }
+        inline typename detail::ordered_map<std::string, ini_value>::value_type& back() noexcept { return *--end(); }
+        inline typename detail::ordered_map<std::string, ini_value>::value_type const& back() const noexcept { return *--end(); }
 
-        inline INICPP iterator begin() noexcept { return iterator(m_data.begin(), m_data); }
-        inline INICPP const_iterator begin() const noexcept { return const_iterator(m_data.begin(), m_data); }
-        inline INICPP const_iterator cbegin() const noexcept { return const_iterator(m_data.begin(), m_data); }
-        inline INICPP iterator end() noexcept { return iterator(m_data.end(), m_data); }
-        inline INICPP const_iterator end() const noexcept { return const_iterator(m_data.end(), m_data); }
-        inline INICPP const_iterator cend() const noexcept { return const_iterator(m_data.end(), m_data); }
+        inline iterator begin() noexcept { return iterator(m_data.begin(), m_data); }
+        inline const_iterator begin() const noexcept { return const_iterator(m_data.begin(), m_data); }
+        inline const_iterator cbegin() const noexcept { return const_iterator(m_data.begin(), m_data); }
+        inline iterator end() noexcept { return iterator(m_data.end(), m_data); }
+        inline const_iterator end() const noexcept { return const_iterator(m_data.end(), m_data); }
+        inline const_iterator cend() const noexcept { return const_iterator(m_data.end(), m_data); }
 
-        inline INICPP reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-        inline INICPP const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
-        inline INICPP const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator(cend()); }
-        inline INICPP reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-        inline INICPP const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
-        inline INICPP const_reverse_iterator rcend() const noexcept { return const_reverse_iterator(cbegin()); }
+        inline reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+        inline const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
+        inline const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator(cend()); }
+        inline reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+        inline const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
+        inline const_reverse_iterator rcend() const noexcept { return const_reverse_iterator(cbegin()); }
     private:
         std::string m_name;
         mutable detail::ordered_map<std::string, ini_value> m_data;
@@ -238,19 +238,11 @@ namespace inicpp {
         friend class ini_value;
     };
 
-    inline INICPP ini_section::ini_section(const ini_section& other) : m_data(other.m_data) { this->set_name(other.m_name); }
-    inline INICPP ini_section::ini_section(ini_section&& other) : m_data(std::move(other.m_data)) { this->set_name(std::move(other.m_name)); }
+    inline ini_section::ini_section(const ini_section& other) : m_data(other.m_data) { this->set_name(other.m_name); }
+    inline ini_section::ini_section(ini_section&& other) : m_data(std::move(other.m_data)) { this->set_name(std::move(other.m_name)); }
 
-    inline INICPP ini_section::ini_section(const std::string& name) { this->set_name(name); }
-    inline INICPP ini_section::ini_section(std::string&& name) { this->set_name(std::move(name)); }
-
-    extern template class detail::key_iterator<std::string, ini_value>;
-    extern template class detail::key_iterator<std::string, const ini_value>;
-
-    extern template class detail::reverse_iterator<detail::key_iterator<std::string, ini_value>>;
-    extern template class detail::reverse_iterator<detail::key_iterator<std::string, const ini_value>>;
-
-    extern template class detail::ordered_map<std::string, ini_value>;
+    inline ini_section::ini_section(const std::string& name) { this->set_name(name); }
+    inline ini_section::ini_section(std::string&& name) { this->set_name(std::move(name)); }
 }
 
 #endif

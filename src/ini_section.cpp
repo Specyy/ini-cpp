@@ -43,12 +43,4 @@ namespace inicpp {
         const_cast<ini_section*>(this)->push_back({ std::move(key), ini_value() });
         return this->back().second;
     }
-
-    template class detail::key_iterator<std::string, ini_value>;
-    template class detail::key_iterator<std::string, const ini_value>;
-
-    template class detail::reverse_iterator<detail::key_iterator<std::string, ini_value>>;
-    template class detail::reverse_iterator<detail::key_iterator<std::string, const ini_value>>;
-
-    template class detail::ordered_map<std::string, ini_value>;
 }
