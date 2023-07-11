@@ -17,7 +17,10 @@ ini-cpp is a lightweight ".ini" file parser and emitter written in modern C++17.
 
 To use ini-cpp in your project, follow these steps:
 
-1. Clone or download the ini-cpp repository. `git clone https://github.com/Specyy/ini-cpp.git`
+1. Clone or download the ini-cpp repository. 
+```sh
+git clone https://github.com/Specyy/ini-cpp.git
+```
 2. Navigate into the source directory, create build folder and run `CMake`:
 ```sh
 cd ini-cpp
