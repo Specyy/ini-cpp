@@ -24,6 +24,7 @@ git clone https://github.com/Specyy/ini-cpp.git
 2. Navigate into the source directory, create build folder and run `CMake`:
 ```sh
 cd ini-cpp
-mkdir build && cd build
+mkdir build
+cd build
 cmake .. [-G generator] [-DINICPP_TEST=ON|OFF]
 ```
