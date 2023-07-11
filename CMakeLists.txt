@@ -54,10 +54,10 @@ if(INICPP_TEST)
     target_compile_features(${INICPP_TEST_NAME} PRIVATE cxx_std_17)
 
     # Test target properties - uses shared library
-    target_link_libraries(${INICPP_TEST_NAME} PRIVATE ini-cpp)
+    target_link_libraries(${INICPP_TEST_NAME} PRIVATE "${PROJECT_NAME}")
     target_compile_definitions(${INICPP_TEST_NAME} PRIVATE INICPP_DLL=1)
 
     # Test target properties - uses static library
-    # target_link_libraries(${INICPP_TEST_NAME} PRIVATE ini-cpp-static)
+    # target_link_libraries(${INICPP_TEST_NAME} PRIVATE "${PROJECT_NAME}-static")
 endif()
 
