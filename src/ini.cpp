@@ -282,12 +282,12 @@ namespace inicpp {
                     if (end_section_pos > comment_handle_pos || end_section_pos == std::string_view::npos) {
                         // error, expected ']' to end section name
                         in.setstate(std::ios_base::failbit);
-                        throw parser_exception(std::to_string(line_number) + " Expected ']' before end of line");
+                        throw parser_exception(std::to_string(line_number) + ":" + std::to_string(name.data() - line.data() + name.length() + 1) + " Expected ']' before end of line");
                         return;
                     } else if (name.length() == 0) {
                         // error, expected section name
                         in.setstate(std::ios_base::failbit);
-                        throw parser_exception(std::to_string(line_number) + ":2 Expected valid section name before ']'");
+                        throw parser_exception(std::to_string(line_number) + ":" + std::to_string(trimmed_line.data() - line.data() + 2) + " Expected valid section name before ']'");
                         return;
                     }
 
@@ -300,7 +300,7 @@ namespace inicpp {
                         for (;next_valid_pos < trimmed_line.length() && std::isspace(trimmed_line[next_valid_pos]); next_valid_pos++);
                         if (next_valid_pos != comment_handle_pos) {
                             // error, unexpected character `trimmed_line[next_valid_pos]`
-                            throw parser_exception(std::to_string(line_number) + ":" + std::to_string(next_valid_pos + 1) + " Unexpected character");
+                            throw parser_exception(std::to_string(line_number) + ":" + std::to_string(trimmed_line.data() - line.data() + next_valid_pos + 1) + " Unexpected character");
                             in.setstate(std::ios_base::failbit);
                             return;
                         }
@@ -325,20 +325,18 @@ namespace inicpp {
                         if (delim_pos == std::string_view::npos) {
                             // error, expected delimeter
                             in.setstate(std::ios_base::failbit);
-                            throw parser_exception(std::to_string(line_number) + " Expected delimeter before end of line");
+                            throw parser_exception(std::to_string(line_number) + ":" + std::to_string(accessible_line.data() - line.data() + accessible_line.length() + 1) + " Expected delimeter before end of line");
                             return;
                         }
                         sec[std::string(trim(accessible_line.substr(0, delim_pos)))].set_value(std::string(trim(accessible_line.substr(delim_pos + 1))));
                     }
                 } else {
-                    bool found = false;
-                    for (auto const& comment_handle : m_comment_handles) {
-                        if (found = starts_with(trimmed_line, comment_handle)) break;
-                    }
+                    bool found = std::find_if(m_comment_handles.begin(), m_comment_handles.end(),
+                        [&trimmed_line](const std::string& comment_handle) { return starts_with(trimmed_line, comment_handle); }) != m_comment_handles.end();
                     if (!found) {
                         // error, unexpected character `trimmed_line[0]`
                         in.setstate(std::ios_base::failbit);
-                        throw parser_exception(std::to_string(line_number) + ":1 Unexpected character");
+                        throw parser_exception(std::to_string(line_number) + ":" + std::to_string(trimmed_line.data() - line.data() + 1) + " Unexpected character");
                         return;
                     }
                 }
